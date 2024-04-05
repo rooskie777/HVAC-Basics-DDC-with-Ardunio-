@@ -1,0 +1,40 @@
+#include "DHT.h"
+
+#define DHTPIN 2          // Pin connected to the DHT sensor
+#define DHTTYPE DHT22     // DHT 22 (change to DHT11 if using that model)
+#define RELAY_PIN 8       // Pin connected to the relay controlling the fan
+#define HUMIDITY_THRESHOLD 60.0 // The humidity threshold for turning on the fan
+
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  Serial.begin(9600);   // Start serial communication
+  pinMode(RELAY_PIN, OUTPUT); // Set the relay pin as an output
+  dht.begin();          // Initialize the DHT sensor
+}
+
+void loop() {
+  // Reading humidity
+  float humidity = dht.readHumidity();
+  
+  // Check if any reads failed and exit early (to try again).
+  if (isnan(humidity)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+  
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.println(" %");
+  
+  // Control the fan based on the humidity level
+  if (humidity > HUMIDITY_THRESHOLD) {
+    digitalWrite(RELAY_PIN, HIGH); // Turn on the fan
+    Serial.println("Fan turned ON due to high humidity.");
+  } else {
+    digitalWrite(RELAY_PIN, LOW); // Turn off the fan
+    Serial.println("Fan turned OFF.");
+  }
+  
+  delay(2000); // Wait a few seconds between measurements
+}
